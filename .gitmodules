@@ -1,0 +1,3 @@
+[submodule "AssemblyUtils"]
+	path = AssemblyUtils
+	url = https://github.com/MarcusTL12/AssemblyUtils
