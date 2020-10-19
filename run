@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+
+import subprocess
+import os
+import sys
+
+import time
+
+
+def compiledir(path):
+    if any(fname.endswith('.s') for fname in os.listdir(path)):
+        subprocess.call("gcc -c {}/*.s".format(path), shell=True)
+    d = os.path.join(path, "dirs")
+    if os.path.exists(d):
+        with open(d) as f:
+            for line in f:
+                line = line.strip()
+                compiledir(os.path.join(path, line))
+
+
+compiledir(".")
+
+subprocess.call("ld *.o", shell=True)
+subprocess.call("rm *.o", shell=True)
+
+run_command = ["./a.out"]
+
+for i in range(1, len(sys.argv)):
+    run_command.append(sys.argv[i])
+
+t = time.time()
+subprocess.run(run_command)
+t = time.time() - t
+print("Took {:.2f} s".format(t))
