@@ -15,8 +15,22 @@ _start:
     mov 16(%rsp), %rdi
     call parse_str_int
     
-    mov %rax, %rdi
-    call print_int_dec_s
+    dec %rax
+    test %rax, %rax
+    jnz skip1
+    call day1_part1
+    jmp exit
+    skip1:
+    
+    dec %rax
+    test %rax, %rax
+    jnz skip2
+    call day1_part2
+    jmp exit
+    skip2:
+    
+    mov $not_implemented_message, %rdi
+    call print
     call newline
 
 exit:
@@ -29,4 +43,6 @@ exit:
 argc_incorrect_message:
     .string "Give day and part as command line arguments"
 
+not_implemented_message:
+    .string "Day/part does not exist"
 
