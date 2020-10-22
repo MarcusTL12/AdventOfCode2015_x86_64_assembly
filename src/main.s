@@ -61,13 +61,20 @@ _start:
     add %r12, %r8
     call *(%r8)
     
+    mov $succesful_message, %rdi
+    call print
+    call newline
+    
     jmp exit
+    
+    # Prints error message if invalid day
     day_not_implemented:
     mov $day_not_implemented_message, %rdi
     call print
     call newline
     jmp exit
     
+    # Prints error message if invalid part
     part_not_implemented:
     mov $part_not_implemented_message, %rdi
     call print
@@ -89,8 +96,12 @@ day_not_implemented_message:
 part_not_implemented_message:
     .string "Part does not exist"
 
+succesful_message:
+    .string "Terminated succesfully!"
+
 amt_days:
-    .quad 1
+    .quad 2
 
 daylist:
     .quad day1_part1, day1_part2
+    .quad day2_part1, day2_part2
