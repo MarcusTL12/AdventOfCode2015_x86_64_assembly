@@ -9,7 +9,7 @@ import time
 
 def compiledir(path):
     if any(fname.endswith('.s') for fname in os.listdir(path)):
-        subprocess.call("gcc -c {}/*.s".format(path), shell=True)
+        subprocess.call("gcc -c -g {}/*.s".format(path), shell=True)
     d = os.path.join(path, "dirs")
     if os.path.exists(d):
         with open(d) as f:
