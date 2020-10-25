@@ -1,9 +1,13 @@
-.globl _start
+.globl main
 .text
 
-_start:
+main:
+    push %r12
+    push %r13
+    push %r14
+    mov %rsi, %r14
     # Check if 2 or more command line arguments was passed
-    mov (%rsp), %r8
+    mov %rdi, %r8
     cmp $3, %r8
     jge argc_correct
     mov $argc_incorrect_message, %rdi
@@ -14,13 +18,14 @@ _start:
     # parses the two command line arguments as integers and stores them
     # in %r12: day, %r13: part
     argc_correct:
+    
     # Day
-    mov 16(%rsp), %rdi
+    mov 8(%r14), %rdi
     call parse_str_int
     mov %rax, %r12
     
     # Part
-    mov 24(%rsp), %rdi
+    mov 16(%r14), %rdi
     call parse_str_int
     mov %rax, %r13
     
@@ -81,9 +86,10 @@ _start:
     call newline
 
 exit:
-    mov $60, %rax
-    xor %rdi, %rdi
-    syscall
+    pop %r14
+    pop %r13
+    pop %r12
+    ret
 
 .data
 

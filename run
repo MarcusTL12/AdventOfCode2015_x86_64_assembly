@@ -1,34 +1,71 @@
 #!/usr/bin/env python3
 
 import subprocess
-import os
 import sys
+import os
 
-import time
+from time import time
+
+stdlib = "libc"
+debug = False
+
+if not os.path.exists("./build"):
+    subprocess.call("mkdir build", shell=True)
+
+compiledirs = [
+    "./AssemblyUtils/src",
+    "./src"
+]
 
 
-def compiledir(path):
-    if any(fname.endswith('.s') for fname in os.listdir(path)):
-        subprocess.call("gcc -c -g {}/*.s".format(path), shell=True)
-    d = os.path.join(path, "dirs")
-    if os.path.exists(d):
-        with open(d) as f:
-            for line in f:
-                line = line.strip()
-                compiledir(os.path.join(path, line))
+def compiledir(path, ninja):
+    filenames = []
+    for d, _, files in os.walk(path):
+        for file in files:
+            name, ext = os.path.splitext(file)
+            if ext == ".s":
+                filenames.append(name)
+                ninja.write(f"build $build_dir/{name}.o: asm {d}/{name}.s\n")
+    return filenames
 
 
-compiledir(".")
+with open("build.ninja", "w") as ninja:
+    ninja.write("build_dir = build\n")
+    ninja.write(f"c_flags = -stdlib={stdlib}\n")
+    ninja.write(f"""
+rule asm
+    command = clang {" -g" if debug else ""} -o $out -c $in
 
-subprocess.call("ld *.o", shell=True)
-subprocess.call("rm *.o", shell=True)
+""")
+    ninja.write(f"""
+rule link
+    command = clang $c_flags -o $out $in
+
+""")
+    filenames = []
+    for d in compiledirs:
+        filenames.extend(compiledir(d, ninja))
+
+    ninja.write("\nbuild a.out: link")
+    for name in filenames:
+        ninja.write(f" $\n    $build_dir/{name}.o")
+    ninja.write("\n")
+
+
+t0 = time()
+
+subprocess.call("ninja")
+
+comp_time = time() - t0
+
+print(f"Compile time: {comp_time:.3f} s")
 
 run_command = ["./a.out"]
 
 for i in range(1, len(sys.argv)):
     run_command.append(sys.argv[i])
 
-t = time.time()
+t = time()
 subprocess.run(run_command)
-t = time.time() - t
-print("Took {:.3f} s".format(t))
+t = time() - t
+print(f"Run time: {t:.3f} s")

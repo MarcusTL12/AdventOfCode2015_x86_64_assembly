@@ -82,7 +82,53 @@ day2_part1:
     ret
 
 day2_part2:
+    .set buffer_size, 4
+    push %r12
+    push %r13
+    push %r14
     
+    # Open file and save id to %r12
+    mov $filename, %rdi
+    call open_file_r
+    mov %rax, %r12
+    
+    # Local variables:
+    # -buffered_file_reader_size(%rbp) Buffered file reader object
+    # -buffered_file_reader_size - buffer_size(%rbp) local buffer
+    push %rbp
+    mov %rsp, %rbp
+    sub $40 + buffer_size, %rsp
+    
+    # Save pointer to buffered file reader object to %r13
+    lea -40(%rbp), %r13
+    
+    # Save pointer to local buffer in %r14
+    lea -40 - 4(%rbp), %r14
+    
+    mov %r13, %rdi
+    mov %r12, %rsi
+    mov %r14, %rdx
+    mov $buffer_size, %rcx
+    call make_buffered_file_reader
+    
+    mov %r13, %rdi
+    mov %r14, %rsi
+    mov $buffer_size, %rdx
+    call read_buffered_file
+    
+    mov %r14, %rdi
+    mov $buffer_size, %rsi
+    call print_n
+    call newline
+    
+    leave
+    
+    mov %r12, %rdi
+    call close_file
+    
+    pop %r14
+    pop %r13
+    pop %r12
     ret
 
 
