@@ -106,8 +106,9 @@ succesful_message:
     .string "Terminated succesfully!"
 
 amt_days:
-    .quad 2
+    .quad 3
 
 daylist:
     .quad day1_part1, day1_part2
     .quad day2_part1, day2_part2
+    .quad day3_part1, day3_part2
