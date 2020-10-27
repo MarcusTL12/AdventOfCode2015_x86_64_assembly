@@ -43,108 +43,135 @@ split_numbers:
     
     ret
 
-day2_part1:
-    .set buffer_size, 3 * 8
-    
-    push %r12
-    
-    push %rbp
-    mov %rsp, %rbp
-    sub $buffer_size, %rsp
-    
-    lea -buffer_size(%rbp), %r12
-    
-    mov $test_nums, %rdi
-    call strlen
-    
-    mov $test_nums, %rdi
-    mov %rax, %rsi
-    mov %r12, %rdx
-    call split_numbers
-    
-    mov 0(%r12), %rdi
-    call print_int_dec_s
-    call newline
-    
-    mov 8(%r12), %rdi
-    call print_int_dec_s
-    call newline
-    
-    mov 16(%r12), %rdi
-    call print_int_dec_s
-    call newline
-    
-    
-    leave
-    
-    pop %r12
-    
-    ret
 
-day2_part2:
-    .set buffer_size, 512
-    .set l_buf_size, 16
+
+day2_part1:
+    .set fr_size, 40
+    .set num_buf_size, 3 * 8
+    .set file_buf_size, 1024
+    .set line_buf_size, 16
+    
     push %r12
     push %r13
     push %r14
     push %r15
     
-    # Open file and save id to %r12
-    mov $filename, %rdi
-    call open_file_r
-    mov %rax, %r12
-    
-    # Local variables:
-    # 40 bytes: Buffered file reader object
-    # buffer_size: Buffer for the file reader
-    # l_buf_size: local line buffer
     push %rbp
     mov %rsp, %rbp
-    sub $40 + buffer_size + l_buf_size, %rsp
+    sub $fr_size + num_buf_size + file_buf_size + line_buf_size, %rsp
     
-    # Save pointer to buffered file reader object to %r13
-    lea -40(%rbp), %r13
+    # Open file and store id in %rsi for making file reader
+    mov $filename, %rdi
+    call open_file_r
+    mov %rax, %rsi
     
-    # Allocating local buffer to pointer in %r14
-    lea -40 - buffer_size - l_buf_size(%rbp), %r14
+    # Store file reader pointer in %r12
+    lea -fr_size(%rbp), %r12
     
-    # Allocating reader buffer to pointer in %r15
-    lea -40 - buffer_size(%rbp), %r15
+    # Store line buffer pointer in %r13
+    lea -fr_size - num_buf_size - file_buf_size - line_buf_size(%rbp), %r13
     
-    # Make the file reader
-    mov %r13, %rdi
-    mov %r12, %rsi
-    mov %r15, %rdx
-    mov $buffer_size, %rcx
+    # Store num buffer pointer in %r14
+    lea -fr_size - num_buf_size(%rbp), %r14
+    
+    # Make file reader
+    mov %r12, %rdi
+    lea -fr_size - num_buf_size - file_buf_size(%rbp), %rdx
+    mov $file_buf_size, %rcx
     call make_buffered_file_reader
     
-    mov %r13, %rdi
-    mov %r14, %rsi
-    call read_buf_file_line
+    part1_loop:
+        mov %r12, %rdi
+        mov %r13, %rsi
+        call read_buf_file_line
+        test %rax, %rax
+        jz part1_loop_end
+        
+        mov %r13, %rdi
+        mov %rax, %rsi
+        mov %r14, %rdx
+        call split_numbers
+        
+        
+        
+        call newline
+        
+        jmp part1_loop
+    part1_loop_end:
     
-    mov %r14, %rdi
-    mov %rax, %rsi
-    call print_n
-    call newline
-    
-    mov %r13, %rdi
-    mov %r14, %rsi
-    call read_buf_file_line
-    
-    mov %r14, %rdi
-    mov %rax, %rsi
-    call print_n
-    call newline
+    # Close file
+    mov (%r12), %rdi
+    call close_file
     
     leave
-    
-    mov %r12, %rdi
-    call close_file
     
     pop %r15
     pop %r14
     pop %r13
     pop %r12
+    
+    ret
+
+day2_part2:
+    .set fr_size, 40
+    .set num_buf_size, 3 * 8
+    .set file_buf_size, 17
+    .set line_buf_size, 4
+    
+    push %r12
+    push %r13
+    push %r14
+    push %r15
+    
+    push %rbp
+    mov %rsp, %rbp
+    sub $fr_size + num_buf_size + file_buf_size + line_buf_size, %rsp
+    
+    # Open file and store id in %rsi for making file reader
+    mov $filename, %rdi
+    call open_file_r
+    mov %rax, %rsi
+    
+    # Store file reader pointer in %r12
+    lea -fr_size(%rbp), %r12
+    
+    # Store line buffer pointer in %r13
+    lea -fr_size - num_buf_size - file_buf_size - line_buf_size(%rbp), %r13
+    
+    # Store num buffer pointer in %r14
+    lea -fr_size - num_buf_size(%rbp), %r14
+    
+    # Make file reader
+    mov %r12, %rdi
+    lea -fr_size - num_buf_size - file_buf_size(%rbp), %rdx
+    mov $file_buf_size, %rcx
+    call make_buffered_file_reader
+    
+    part2_loop:
+        mov %r12, %rdi
+        call read_buf_file_byte
+        jz part2_loop_end
+        
+        movb %al, (%r13)
+        mov %r13, %rdi
+        mov $1, %rsi
+        call print_n
+        # call newline
+        
+        jmp part2_loop
+    part2_loop_end:
+    
+    # Close file
+    mov (%r12), %rdi
+    call close_file
+    
+    leave
+    
+    pop %r15
+    pop %r14
+    pop %r13
+    pop %r12
+    
     ret
 
 
@@ -154,4 +181,8 @@ test_nums:
     .string "6x26x20"
 
 filename:
-    .string "inputfiles/day2.txt"
+    .string "inputfiles/day2/ex1.txt"
+    # .string "testfile.txt"
+
+space:
+    .string " "
