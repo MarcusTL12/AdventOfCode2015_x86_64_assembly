@@ -13,7 +13,7 @@ excecutable_name = "a.out"
 build_dir = "build/release" if not debug else "build/debug"
 
 if not os.path.exists(f"./{build_dir}"):
-    subprocess.call(f"mkdir {build_dir}", shell=True)
+    subprocess.call(f"mkdir -p {build_dir}", shell=True)
 
 compiledirs = [
     "./AssemblyUtils/src",
@@ -56,7 +56,7 @@ rule link
 
 t0 = time()
 
-subprocess.call("ninja")
+subprocess.call("ninja", shell=True)
 
 comp_time = time() - t0
 
