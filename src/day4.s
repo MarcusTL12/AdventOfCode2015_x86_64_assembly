@@ -2,71 +2,105 @@
 .globl day4_part2
 .text
 
-# Parameters
-# %rdi: number to be tested
-# Returns true if valid false otherwise
-part1_valid:
-    ret
 
 # Parameters
-# %rdi: Pointer to bcd buffer
-next_number:
-    xor %r8, %r8
+# %rdi: Pointer to string
+# %rsi: number of zeros to check for
+# Returns true/false
+check_for_zeros:
     xor %rax, %rax
-    next_number_loop:
-        movb (%rdi), %r8b
-        inc %r8
-        cmp $10, %r8
-        cmove %rax, %r8
-        movb %r8b, (%rdi)
+    inc %rax
+    xor %r8, %r8
+    check_loop:
+        xor %r9, %r9
+        movb (%rdi), %r9b
+        cmp $'0', %r9
+        cmovne %r8, %rax
+        jne check_loop_end
         inc %rdi
-        test %r8, %r8
-        jz next_number_loop
+        dec %rsi
+        jnz check_loop
+    check_loop_end:
     ret
 
-day4_part1:
+# Parameters:
+# %rdi: amount of zeros
+# Returns coin
+find_coin:
     push %r12
+    push %r13
+    push %r14
+    push %r15
     
+    mov %rdi, %r15
+    
+    # Local variables
+    .set hex_buf, 32
+    .set inp_buf, hex_buf + 32
     push %rbp
     mov %rsp, %rbp
-    sub $6, %rsp
+    sub $inp_buf, %rsp
     
-    lea -6(%rbp), %r12
+    mov $input, %rdi
+    call strlen
+    mov %rax, %r12
     
-    movb $9, 0(%r12)
-    movb $9, 1(%r12)
-    movb $7, 2(%r12)
+    lea -inp_buf(%rbp), %rdi
+    mov $input, %rsi
+    mov %r12, %rdx
+    call memcpy
     
-    mov %r12, %rdi
-    call next_number
+    xor %r14, %r14
     
-    xor %r9, %r9
+    coin_loop:
+        inc %r14
+        mov %r14, %rdi
+        lea -inp_buf(%rbp, %r12, 1), %rsi
+        call int_to_dec
+        mov %rax, %r13
+        add %r12, %r13
+        
+        lea -inp_buf(%rbp), %rdi
+        mov %r13, %rsi
+        lea -hex_buf(%rbp), %rdx
+        call md5_str
+        
+        lea -hex_buf(%rbp), %rdi
+        mov %r15, %rsi
+        call check_for_zeros
+        test %rax, %rax
+        
+        jz coin_loop
     
-    movb 0(%r12), %r9b
-    mov %r9, %rdi
-    call print_int_dec_s
-    call newline
-    
-    movb 1(%r12), %r9b
-    mov %r9, %rdi
-    call print_int_dec_s
-    call newline
-    
-    movb 2(%r12), %r9b
-    mov %r9, %rdi
-    call print_int_dec_s
-    call newline
+    mov %r14, %rax
     
     leave
+    
+    pop %r15
+    pop %r14
+    pop %r13
     pop %r12
     ret
 
+day4_part1:
+    mov $5, %rdi
+    call find_coin
+    mov %rax, %rdi
+    call print_int_dec
+    call newline
+    ret
 
 day4_part2:
+    mov $6, %rdi
+    call find_coin
+    mov %rax, %rdi
+    call print_int_dec
+    call newline
     ret
 
 .data
 
-range:
-    .quad 359282
-    .quad 820401
+
+input:
+    .string "ckczppom"
+    # .string "abcdef"
