@@ -1,3 +1,6 @@
 [submodule "AssemblyUtils"]
 	path = AssemblyUtils
 	url = https://github.com/MarcusTL12/AssemblyUtils
+[submodule "packages/hashmap.c"]
+	path = packages/hashmap.c
+	url = https://github.com/tidwall/hashmap.c
