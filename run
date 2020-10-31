@@ -22,6 +22,10 @@ compiledirs = [
     "./src"
 ]
 
+c_compiledirs = [
+    "./packages/hashmap.c"
+]
+
 
 def compiledir(path, ninja):
     filenames = []
@@ -33,6 +37,15 @@ def compiledir(path, ninja):
                 ninja.write(f"build $build_dir/{name}.o: asm {d}/{name}.s\n")
     return filenames
 
+def compiledir_c(path, ninja):
+    filenames = []
+    for d, _, files in os.walk(path):
+        for file in files:
+            name, ext = os.path.splitext(file)
+            if ext == ".c":
+                filenames.append(name)
+                ninja.write(f"build $build_dir/{name}.o: cc {d}/{name}.c\n")
+    return filenames
 
 with open("build.ninja", "w") as ninja:
     ninja.write(f"build_dir = {build_dir}\n")
@@ -43,6 +56,10 @@ rule asm
     command = clang{" -g" if debug else ""} -o $out -c $in
 """)
     ninja.write(f"""
+rule cc
+    command = clang{" -g" if debug else ""} -o $out -c $in
+""")
+    ninja.write(f"""
 rule link
     command = clang $c_flags -o $out $in $l_flags
 
@@ -50,6 +67,8 @@ rule link
     filenames = []
     for d in compiledirs:
         filenames.extend(compiledir(d, ninja))
+    for d in c_compiledirs:
+        filenames.extend(compiledir_c(d, ninja))
 
     ninja.write(f"\nbuild {excecutable_name}: link")
     for name in filenames:

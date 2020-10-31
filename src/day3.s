@@ -3,9 +3,7 @@
 .text
 
 day3_part1:
-    mov $message, %rdi
-    call print
-    call newline
+    call hashmap_test
     ret
 
 
