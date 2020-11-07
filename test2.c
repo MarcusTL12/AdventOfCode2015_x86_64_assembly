@@ -1,8 +1,11 @@
-#include <stdio.h>
-#include "packages/hashmap.c/hashmap.h"
+#include <stdbool.h>
+#include <string.h>
 
 
-int main()
-{
-    
+bool test_cmp(void *a, void *b, void *udata) {
+    if (*((long long *) a) != *((long long *) a)) {
+        return false;
+    } else {
+        return memcmp(a + 8, b + 8, *((long long *) a));
+    }
 }
