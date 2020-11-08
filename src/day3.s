@@ -141,6 +141,9 @@ day3_part1:
     mov %r14, %rdi
     call hashmap_free
     
+    mov (%r12), %rdi
+    call close_file
+    
     leave
     
     pop %r14
@@ -226,6 +229,9 @@ day3_part2:
     
     mov %r15, %rdi
     call hashmap_free
+    
+    mov (%r12), %rdi
+    call close_file
     
     leave
     
