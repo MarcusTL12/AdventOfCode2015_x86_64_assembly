@@ -23,7 +23,8 @@ compiledirs = [
 ]
 
 c_compiledirs = [
-    "./packages/hashmap.c"
+    "./packages/hashmap.c",
+    "./AssemblyUtils/src"
 ]
 
 
@@ -53,11 +54,11 @@ with open("build.ninja", "w") as ninja:
     ninja.write(f"l_flags = {link_libraries}\n")
     ninja.write(f"""
 rule asm
-    command = clang{" -g" if debug else ""} -o $out -c $in
+    command = clang{" -g" if debug else " -O3"} -o $out -c $in
 """)
     ninja.write(f"""
 rule cc
-    command = clang{" -g" if debug else ""} -o $out -c $in
+    command = clang{" -g" if debug else " -O3"} -o $out -c $in
 """)
     ninja.write(f"""
 rule link
@@ -90,11 +91,14 @@ if not debug:
     for i in range(1, len(sys.argv)):
         run_command.append(sys.argv[i])
 
-    print(f"Running {excecutable_name}:")
+    s = f"Running {excecutable_name}:"
+    print(s)
+    print("-" * len(s) * 2)
 
     t = time()
     subprocess.run(run_command)
     t = time() - t
+    print("-" * len(s) * 2)
     print(f"Run time: {t:.3f} s")
 else:
     subprocess.call(f"gdb {excecutable_name}", shell=True)
