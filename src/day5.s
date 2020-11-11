@@ -176,7 +176,9 @@ is_nice:
     ret
 
 
-day5_part1:
+# Parameters:
+# %rdi: function to check if string is nice
+check_all_strings:
     .set buf_size, 1000
     
     # local varables
@@ -189,6 +191,9 @@ day5_part1:
     
     push %r12
     push %r13
+    push %r14
+    
+    mov %rdi, %r14
     
     mov $inputfile, %rdi
     call open_file_r
@@ -203,22 +208,22 @@ day5_part1:
     # Store result in %r13
     xor %r13, %r13
     
-    part1_loop:
+    check_all_loop:
         mov %r12, %rdi
         lea -line_buf(%rbp), %rsi
         call read_buf_file_line
         test %rax, %rax
-        jz part1_loop_end
+        jz check_all_loop_end
         
         lea -line_buf(%rbp), %rdi
-        call is_nice
+        call is_really_nice
         xor %r8, %r8
         test %rax, %rax
         setnz %r8b
         add %r8, %r13
         
-        jmp part1_loop
-    part1_loop_end:
+        jmp check_all_loop
+    check_all_loop_end:
     
     mov %r13, %rdi
     call print_int_dec_s
@@ -227,14 +232,114 @@ day5_part1:
     mov (%r12), %rdi
     call close_file
     
+    pop %r14
     pop %r13
     pop %r12
     
     leave
     ret
 
+# Parameters:
+# %rdi: String pointer
+# %rsi: Length of string
+# %dx: The two bytes to check for
+# Returns true if string contains double
+contains_double:
+    dec %rsi
+    
+    xor %rax, %rax
+    
+    double_loop:
+        mov (%rdi), %r8w
+        cmp %r8w, %dx
+        sete %al
+        # Assumes %r9 contains 1
+        cmove %r9, %rsi
+        
+        inc %rdi
+        dec %rsi
+        jnz double_loop
+    ret
+
+
+# Parameters:
+# %rdi: String pointer (line_length bytes)
+# Returns true if string has a double twin
+has_double_twin:
+    mov %rdi, %r10
+    add $2, %r10
+    mov $line_length - 3, %rcx
+    
+    xor %r9, %r9
+    inc %r9
+    
+    double_twin_loop:
+        mov %r10, %rdi
+        mov %rcx, %rsi
+        inc %rsi
+        mov -2(%r10), %dx
+        call contains_double
+        test %rax, %rax
+        cmovnz %r9, %rcx
+        
+        inc %r10
+        dec %rcx
+        jnz double_twin_loop
+    ret
+
+
+# Parameters:
+# %rdi: String pointer (line_length bytes)
+# Returns true if string has distant twins
+has_distant_twin:
+    mov $line_length - 3, %rcx
+    
+    xor %r10, %r10
+    inc %r10
+    xor %rax, %rax
+    
+    dist_twin_loop:
+        mov (%rdi), %r8b
+        mov 2(%rdi), %r9b
+        cmp %r8b, %r9b
+        sete %al
+        cmove %r10, %rcx
+        
+        inc %rdi
+        dec %rcx
+        jnz dist_twin_loop
+    ret
+
+
+# Parameters:
+# %rdi: String pointer (line_length bytes)
+# Returns true if string is really nice
+is_really_nice:
+    push %r12
+    mov %rdi, %r12
+    call has_double_twin
+    mov %rax, %r11
+    
+    mov %r12, %rdi
+    call has_distant_twin
+    and %r11, %rax
+    
+    pop %r12
+    ret
+
+
+day5_part1:
+    mov $is_really_nice, %rdi
+    call check_all_strings
+    ret
+
 
 day5_part2:
+    mov $teststring2, %rdi
+    call is_really_nice
+    mov %rax, %rdi
+    call print_int_dec_s
+    call newline
     ret
 
 
@@ -255,4 +360,4 @@ teststring:
     .string "ugknbfddgicrmopn"
 
 teststring2:
-    .string "dvszwmarrgswjxmb"
+    .string "aqjhvtzxzqqjkmpb"
