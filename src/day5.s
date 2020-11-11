@@ -177,69 +177,6 @@ is_nice:
 
 
 # Parameters:
-# %rdi: function to check if string is nice
-check_all_strings:
-    .set buf_size, 1000
-    
-    # local varables
-    .set file_reader, 40
-    .set file_buf, file_reader + buf_size
-    .set line_buf, file_buf + line_length
-    push %rbp
-    mov %rsp, %rbp
-    sub $line_buf, %rsp
-    
-    push %r12
-    push %r13
-    push %r14
-    
-    mov %rdi, %r14
-    
-    mov $inputfile, %rdi
-    call open_file_r
-    mov %rax, %rsi
-    
-    lea -file_reader(%rbp), %r12
-    mov %r12, %rdi
-    lea -file_buf(%rbp), %rdx
-    mov $buf_size, %rcx
-    call make_buffered_file_reader
-    
-    # Store result in %r13
-    xor %r13, %r13
-    
-    check_all_loop:
-        mov %r12, %rdi
-        lea -line_buf(%rbp), %rsi
-        call read_buf_file_line
-        test %rax, %rax
-        jz check_all_loop_end
-        
-        lea -line_buf(%rbp), %rdi
-        call is_really_nice
-        xor %r8, %r8
-        test %rax, %rax
-        setnz %r8b
-        add %r8, %r13
-        
-        jmp check_all_loop
-    check_all_loop_end:
-    
-    mov %r13, %rdi
-    call print_int_dec_s
-    call newline
-    
-    mov (%r12), %rdi
-    call close_file
-    
-    pop %r14
-    pop %r13
-    pop %r12
-    
-    leave
-    ret
-
-# Parameters:
 # %rdi: String pointer
 # %rsi: Length of string
 # %dx: The two bytes to check for
@@ -292,7 +229,7 @@ has_double_twin:
 # %rdi: String pointer (line_length bytes)
 # Returns true if string has distant twins
 has_distant_twin:
-    mov $line_length - 3, %rcx
+    mov $line_length - 2, %rcx
     
     xor %r10, %r10
     inc %r10
@@ -328,22 +265,86 @@ is_really_nice:
     ret
 
 
+# Parameters:
+# %rdi: function to check if string is nice
+check_all_strings:
+    .set buf_size, 1000
+    
+    # local varables
+    .set file_reader, 40
+    .set file_buf, file_reader + buf_size
+    .set line_buf, file_buf + line_length
+    push %rbp
+    mov %rsp, %rbp
+    sub $line_buf, %rsp
+    
+    push %r12
+    push %r13
+    push %r14
+    
+    mov %rdi, %r14
+    
+    mov $inputfile, %rdi
+    call open_file_r
+    mov %rax, %rsi
+    
+    lea -file_reader(%rbp), %r12
+    mov %r12, %rdi
+    lea -file_buf(%rbp), %rdx
+    mov $buf_size, %rcx
+    call make_buffered_file_reader
+    
+    # Store result in %r13
+    xor %r13, %r13
+    
+    check_all_loop:
+        mov %r12, %rdi
+        lea -line_buf(%rbp), %rsi
+        call read_buf_file_line
+        test %rax, %rax
+        jz check_all_loop_end
+        
+        lea -line_buf(%rbp), %rdi
+        push %r14
+        call *(%rsp)
+        add $8, %rsp
+        xor %r8, %r8
+        test %rax, %rax
+        setnz %r8b
+        add %r8, %r13
+        
+        jmp check_all_loop
+    check_all_loop_end:
+    
+    mov %r13, %rdi
+    call print_int_dec_s
+    call newline
+    
+    mov (%r12), %rdi
+    call close_file
+    
+    pop %r14
+    pop %r13
+    pop %r12
+    
+    leave
+    ret
+
+
 day5_part1:
-    mov $is_really_nice, %rdi
+    mov $is_nice, %rdi
     call check_all_strings
     ret
 
 
 day5_part2:
-    mov $teststring2, %rdi
-    call is_really_nice
-    mov %rax, %rdi
-    call print_int_dec_s
-    call newline
+    mov $is_really_nice, %rdi
+    call check_all_strings
     ret
 
 
 .data
+
 
 vowels:
     .string "aeiou"
@@ -355,9 +356,3 @@ blacklist:
 inputfile:
     .string "inputfiles/day5/input.txt"
 
-
-teststring:
-    .string "ugknbfddgicrmopn"
-
-teststring2:
-    .string "aqjhvtzxzqqjkmpb"
