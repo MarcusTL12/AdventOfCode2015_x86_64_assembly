@@ -158,14 +158,35 @@ parse_input_numbers:
 # %r8: width
 # %r9: height
 set_grid:
+    push %r12
+    push %r13
+    push %r14
+    push %r15
+    
     imul $1000, %rcx
     add %rcx, %rdx
+    add %rdx, %rdi
+    mov %rdi, %r12
+    
+    mov %r8, %r13
+    mov %r9, %r14
+    
+    mov %rsi, %r15
     
     set_grid_loop:
-        
+        mov %r12, %rdi
+        mov %r15, %rsi
+        mov %r13, %rdx
+        call memset
         
         dec %r9
+        add $1000, %r12
         jnz set_grid_loop
+    
+    pop %r15
+    pop %r14
+    pop %r13
+    pop %r12
     ret
 
 
