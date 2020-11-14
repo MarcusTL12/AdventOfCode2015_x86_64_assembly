@@ -518,12 +518,3 @@ toggle:
     .string "toggle"
 .set toggle_length, 6
 
-
-teststring1:
-    .string "turn off 499,499 through 500,500"
-
-teststring2:
-    .string "turn on 0,0 through 999,999"
-
-teststring3:
-    .string "toggle 0,0 through 999,0"

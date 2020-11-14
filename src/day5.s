@@ -305,9 +305,7 @@ check_all_strings:
         jz check_all_loop_end
         
         lea -line_buf(%rbp), %rdi
-        push %r14
-        call *(%rsp)
-        add $8, %rsp
+        call *%r14
         xor %r8, %r8
         test %rax, %rax
         setnz %r8b
