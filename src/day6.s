@@ -273,10 +273,9 @@ convert_box:
 # %r8: width
 # %r9: height
 add_grid:
-    push %rbx
     imul $1000, %rcx
     add %rcx, %rdx
-    add %rdx, %rdi
+    lea (%rdi, %rdx, 8), %rdi
     
     xor %rax, %rax
     
@@ -284,15 +283,15 @@ add_grid:
     add_outer:
         xor %r11, %r11
         add_inner:
-            mov %r10, %rbx
-            imul $1000, %rbx
-            add %r11, %rbx
+            mov %r10, %rcx
+            imul $1000, %rcx
+            add %r11, %rcx
             
-            mov (%rdi, %rbx, 8), %rdx
+            mov (%rdi, %rcx, 8), %rdx
             add %rsi, %rdx
             cmp %rax, %rdx
             cmovl %rax, %rdx
-            mov %rdx, (%rdi, %rbx, 1)
+            mov %rdx, (%rdi, %rcx, 8)
             
             inc %r11
             cmp %r11, %r8
@@ -301,7 +300,6 @@ add_grid:
         cmp %r10, %r9
         jne add_outer
     
-    pop %rbx
     ret
 
 
@@ -423,7 +421,7 @@ day6_part1:
     ret
 
 
-# day6_part2:
+day6_part2:
     push %r12
     push %r13
     
@@ -503,8 +501,6 @@ day6_part1:
     pop %r13
     pop %r12
     ret
-
-
 
 
 .data
