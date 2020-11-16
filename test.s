@@ -1,33 +1,35 @@
 	.text
-	.file	"test.c"
-	.globl	file_size                       # -- Begin function file_size
+	.file	"test.cpp"
+	.globl	_Z8testfuncx                    # -- Begin function _Z8testfuncx
 	.p2align	4, 0x90
-	.type	file_size,@function
-file_size:                              # @file_size
+	.type	_Z8testfuncx,@function
+_Z8testfuncx:                           # @_Z8testfuncx
 	.cfi_startproc
 # %bb.0:
-	subq	$152, %rsp
-	.cfi_def_cfa_offset 160
-	leaq	8(%rsp), %rsi
-	callq	stat
-	movq	56(%rsp), %rax
-	addq	$152, %rsp
-	.cfi_def_cfa_offset 8
-	retq
+	movq	%rdi, %rax
+	movl	$4, %ecx
+	mulq	%rcx
+	movq	$-1, %rdi
+	cmovnoq	%rax, %rdi
+	jmp	_Znam                           # TAILCALL
 .Lfunc_end0:
-	.size	file_size, .Lfunc_end0-file_size
+	.size	_Z8testfuncx, .Lfunc_end0-_Z8testfuncx
 	.cfi_endproc
                                         # -- End function
-	.globl	testfunc                        # -- Begin function testfunc
+	.globl	_Z9testfunc2Pi                  # -- Begin function _Z9testfunc2Pi
 	.p2align	4, 0x90
-	.type	testfunc,@function
-testfunc:                               # @testfunc
+	.type	_Z9testfunc2Pi,@function
+_Z9testfunc2Pi:                         # @_Z9testfunc2Pi
 	.cfi_startproc
 # %bb.0:
-	movl	$144, %eax
+	testq	%rdi, %rdi
+	je	.LBB1_1
+# %bb.2:
+	jmp	_ZdaPv                          # TAILCALL
+.LBB1_1:
 	retq
 .Lfunc_end1:
-	.size	testfunc, .Lfunc_end1-testfunc
+	.size	_Z9testfunc2Pi, .Lfunc_end1-_Z9testfunc2Pi
 	.cfi_endproc
                                         # -- End function
 	.ident	"Ubuntu clang version 12.0.0-++20201102052620+327bf5c2d91-1~exp1~20201102163303.210"
