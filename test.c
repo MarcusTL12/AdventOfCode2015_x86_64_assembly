@@ -1,14 +1,10 @@
-#include <sys/stat.h>
 
-long long file_size(char *filename)
-{
-    struct stat st;
-    stat(filename, &st);
-    return st.st_size;
-}
+void print_int_dec_s(long long);
 
-long long testfunc()
+void testfunc(long long x)
 {
-    struct stat st;
-    return sizeof(st);
+    for (long long i = 0; i < x; ++i)
+    {
+        print_int_dec_s(i);
+    }
 }
